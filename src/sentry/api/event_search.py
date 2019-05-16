@@ -317,7 +317,7 @@ class SearchVisitor(NodeVisitor):
             try:
                 search_value = parse_datetime_string(search_value)
             except InvalidQuery as exc:
-                raise InvalidSearchQuery(exc.message)
+                raise InvalidSearchQuery(six.text_type(exc))
             return SearchFilter(search_key, operator, SearchValue(search_value))
         else:
             search_value = operator + search_value if operator != '=' else search_value
@@ -329,7 +329,7 @@ class SearchVisitor(NodeVisitor):
             try:
                 from_val, to_val = parse_datetime_range(value.text)
             except InvalidQuery as exc:
-                raise InvalidSearchQuery(exc.message)
+                raise InvalidSearchQuery(six.text_type(exc))
 
             # TODO: Handle negations
             if from_val is not None:
@@ -353,7 +353,7 @@ class SearchVisitor(NodeVisitor):
         try:
             from_val, to_val = parse_datetime_value(date_value)
         except InvalidQuery as exc:
-            raise InvalidSearchQuery(exc.message)
+            raise InvalidSearchQuery(six.text_type(exc))
 
         # TODO: Handle negations here. This is tricky because these will be
         # separate filters, and to negate this range we need (< val or >= val).
@@ -596,6 +596,5 @@ def get_snuba_query_args(query=None, params=None):
         else:  # SearchBoolean
             # TODO(lb): remove when boolean terms fully functional
             kwargs['has_boolean_terms'] = True
-            # TODO(lb): check that this still works for start, end, project_id, and issue
             kwargs['conditions'].append(convert_search_boolean_to_snuba_query(term))
     return kwargs
